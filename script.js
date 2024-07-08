@@ -5,15 +5,19 @@
 var gameBoard = (function(){
 
     //creating board
-    let board = [[ null, null,null],
-                 [ null, null, null],
-                 [ null, null, null]];
+    let board = [[ " ", " ", " "],
+                 [ " ", " ", " "],
+                 [ " ",  " ", " "]];
 
     function displayBoard(){
+        console.log("----------------------");
         for (let i = 0; i < 3; i++){
+            let row = "|";
             for(let j = 0; j < 3; j++){
-                console.log(board[i][j]);
+                row += board[i][j] ? `${board[i][j]} |` : "  |";
             }
+            console.log(row);
+            console.log("----------------------");
         }
     }
 
@@ -32,8 +36,8 @@ var gameBoard = (function(){
 
     function changeValue(row, col, player){
         // need the index (row and col and uses the player to determine the marker)
-        if (!board[row][col]){
-            board[row][col] = player.marker;
+        if (board[row][col] === " "){
+            board[row][col] = player;
         }
         else{
             console.log("Cannot go there"); 
@@ -42,9 +46,54 @@ var gameBoard = (function(){
 
     function resetBoard(){
         //reset the board
-        board = [[ null, null,null],
-        [ null, null, null],
-        [ null, null, null]];
+        board = [[ " ", " ", " "],
+                 [ " ", " ", " "],
+                 [ " ", " ", " "]];
+    }
+
+    function checkBoardH(marker){
+        for (let row = 0 ; row < 3; row++){
+            if (board[row][0] === marker && marker === board[row][1] && board[row][2] === marker){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkBoardV(marker){
+        for (let col = 0 ; col < 3; col++){
+            if (board[0][col] === marker && marker === board[1][col] && board[2][col] === marker){
+                return true;
+            }
+        }
+        return false;
+        
+    }
+
+    function checkBoardD(marker){
+        if (board[0][0] === marker && marker === board[1][1] && board[2][2] === marker){
+            return true;
+        }
+
+        else if (board[0][2]=== marker && marker === board[1][1] && board[2][0] === marker){
+            return true;
+        }
+
+        else{
+            return false;
+        }
+    }
+
+    function checkTies(){
+        for (let row of board){
+            for(let cell of row){
+                if (cell === " "){
+                    return false; // still empty
+                }
+            }
+        }
+        return true; // no empty spots
+        
     }
 
     // modify the board 
@@ -54,6 +103,11 @@ var gameBoard = (function(){
         changeValue: changeValue,
         resetBoard: resetBoard,
         getBoard: getBoard,
+        checkTies: checkTies,
+        checkBoardD: checkBoardD,
+        checkBoardV: checkBoardV,
+        checkBoardH: checkBoardH,
+
     };
 
 })();
@@ -69,108 +123,52 @@ function Player(name, marker){
 var game = (function(){
 
     function inputPlayer(){
-        var pName = prompt("Enter Player 1 name:");
+        var pName = prompt("Enter Player name:");
         var pMarker = prompt("Enter X or O");
-        return Player(pName, pMarker);
+        return new Player(pName, pMarker);
         // input players 
     }
 
-    function checkBoardH(b, marker){
-        for (let row = 0 ; row < 3; row++){
-            if (b[row][0] === marker && marker === b[row][1] && b[row][2] === marker){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-    }
-
-    function checkBoardV(b, marker){
-        for (let col = 0 ; col < 3; col++){
-            if (b[0][col] === marker && marker === b[1][col] && b[2][col] === marker){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        
-    }
-
-    function checkBoardD(b, marker){
-        if (b[0][0] === marker && marker === b[1][1] && b[2][2] === marker){
-            return true;
-        }
-
-        else if (b[0][2]=== marker && marker === b[1][1] && b[2][0] === marker){
-            return true;
-        }
-
-        else{
-            return false;
-        }
-    }
-
-    function checkTies(b){
-        for (let row of board){
-            for(let cell of row){
-                if (cell === null){
-                    return false; // still empty
-                }
-            }
-        }
-        return true; // no empty spots
-        
-    }
-
-    function check(b){
-        //combine them all together 
-    }
-
-
-    
     function playGame(playerOne, playerTwo){
 
-        // need to put these outside in glpbal code so that the players dont restart
-        // call input players
-
         // make board instance
-        let board = gameBoard.getBoard;
+        let boardInstance = gameBoard;
         let gameOver = false;
-        currentPlayer = playerOne;
+        let currentPlayer = playerOne;
 
 
         // this is the function
         //press yes or no to start (use while loop)
         while(!gameOver){
-            board.displayBoard;
+            boardInstance.displayBoard();
 
-            console.log("${currentPlayer.name} choose a cell: ");
+            console.log(`${currentPlayer.name} choose a cell:`);
             let row = parseInt(prompt("Row Number (0-2): "));
             let col = parseInt(prompt("Col Number (0-2): "));
 
-            gameBoard.changeValue(row, col, currentPlayer.marker);
-            gameBoard.displayBoard();
+            boardInstance.changeValue(row, col, currentPlayer.marker);
+            boardInstance.displayBoard();
 
-            if (checkBoardD(board, currentPlayer.marker)){
-                console.log("${currentPlayer} wins!");
+
+            if (boardInstance.checkBoardV(currentPlayer.marker)){
+                console.log(`${currentPlayer.name} wins!`);
                 currentPlayer.points++;
                 gameOver = true;
             }
-            else if (checkBoardH(board, currentPlayer.marker)){
-                console.log("${currentPlayer} wins!");
-                currentPlayer.points++;
-                gameOver = true;
-            }
-
-            else if (checkBoardD(board, currentPlayer.marker)){
-                console.log("${currentPlayer} wins!");
+            else if (boardInstance.checkBoardH(currentPlayer.marker)){
+                console.log(`${currentPlayer.name} wins!`);
                 currentPlayer.points++;
                 gameOver = true;
             }
 
-            else if (checkTies(board)){
+            else if (boardInstance.checkBoardD(currentPlayer.marker)){
+                console.log(`${currentPlayer.name} win!`);
+                currentPlayer.points++;
+                gameOver = true;
+            }
+
+            else if (boardInstance.checkTies()){
+                console.log("Its a tie");
                 gameOver = true;
             }
 
@@ -180,23 +178,19 @@ var game = (function(){
         let playAgain = prompt("Do you want to play again? (Y/N: ");
         if (playAgain === "Y")
             {
+                boardInstance.resetBoard();
                 playGame(playerOne, playerTwo);
             }
         else{
             console.log("Game is done!");
+            console.log(`${playerOne.name} has ${playerOne.points} points.`);
+            console.log(`${playerTwo.name} has ${playerTwo.points} points.`);
         }
 
-        // if winner/tie then aks to play again if true then it loops back and resets everything if not then it just exits out 
-        // players and markers dont reset if it gets added but if X won or O won then we add a point to that persons marker
 
     }
 
     return {
-        inputPlayer: inputPlayer,
-        checkBoardD: checkBoardH,
-        checkBoardV: checkBoardV,
-        checkBoardD: checkBoardD,
-        checkTies: checkTies,
         inputPlayer: inputPlayer,
         playGame: playGame,
     };
@@ -204,19 +198,10 @@ var game = (function(){
 })();
 
 
-playerOne = game.inputPlayer();
-playerTwo = game.inputPlayer();
+playerOne = new game.inputPlayer();
+playerTwo = new game.inputPlayer();
 
 game.playGame(playerOne, playerTwo);
-
-
-
-    // checks if there is a 3 in a row of X's or O's (so we need our own function for that)
-    // game controller
-
-    //winning function (check one there is atleast 3 pieces
-    // ties
-
 
 
 
