@@ -5,9 +5,9 @@
 var gameBoard = (function(){
 
     //creating board
-    let board = [[ " ", " ", " "],
-                 [ " ", " ", " "],
-                 [ " ",  " ", " "]];
+    let board = [[" X", " ", "O "],
+                 ["O ", "O ", "X "],
+                 ["X ",  " ", "X "]];
 
     function displayBoard(){
         console.log("----------------------");
@@ -198,10 +198,55 @@ var game = (function(){
 })();
 
 
-playerOne = new game.inputPlayer();
-playerTwo = new game.inputPlayer();
+var display = (function(){
 
-game.playGame(playerOne, playerTwo);
+    
+    
+    let onScreenBoard = document.querySelector(".board");
+
+    function render(){
+        let boardArray = gameBoard.getBoard();
+        // take list and turns it into the dom based on what the stages are at its point rn 
+
+        onScreenBoard.innerHTML = '';
+
+        // Set grid layout for onScreenBoard - NEED to fix it
+        onScreenBoard.style.display = 'grid';
+        onScreenBoard.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        onScreenBoard.style.gap = '10px'; 
+
+        boardArray.map(row => {
+            return row.map(cell => {
+                let button = document.createElement('button');
+                button.textContent = cell;
+                button.style.border = '1px solid black';
+                button.style.margin = '5px';
+                onScreenBoard.appendChild(button);
+            });   
+        });
+
+        // map it an display it - CHECK
+
+        // then create th efunction for it to be clicked 
+        // iterate through the buttons so we are able to display it
+
+        // then fix the game logic with the forma dn start button and everything 
+  
+    }
+
+    return{
+        render: render,
+    };
+
+})();
+
+
+// playerOne = new game.inputPlayer();
+// playerTwo = new game.inputPlayer();
+
+// game.playGame(playerOne, playerTwo);
+
+display.render();
 
 
 
