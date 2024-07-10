@@ -6,8 +6,8 @@ var gameBoard = (function(){
 
     //creating board
     let board = [[" X", " ", "O "],
-                 ["O ", "O ", "X "],
-                 ["X ",  " ", "X "]];
+                 ["O ", " ", " "],
+                 [" ",  " ", "X "]];
 
     function displayBoard(){
         console.log("----------------------");
@@ -38,9 +38,11 @@ var gameBoard = (function(){
         // need the index (row and col and uses the player to determine the marker)
         if (board[row][col] === " "){
             board[row][col] = player;
+            return true;
         }
         else{
             console.log("Cannot go there"); 
+            return false;
         }
     }
 
@@ -212,18 +214,28 @@ var display = (function(){
 
         // Set grid layout for onScreenBoard - NEED to fix it
         onScreenBoard.style.display = 'grid';
-        onScreenBoard.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        onScreenBoard.style.gap = '10px'; 
+        onScreenBoard.style.gridTemplateColumns = 'repeat(3, 90px)';
+        // onScreenBoard.style.gap = '10px'; 
 
-        boardArray.map(row => {
-            return row.map(cell => {
+        boardArray.map((row, rowIndex) => {
+            return row.map((cell, colIndex) => {
                 let button = document.createElement('button');
                 button.textContent = cell;
                 button.style.border = '1px solid black';
                 button.style.margin = '5px';
+                button.style.width = '70px';
                 onScreenBoard.appendChild(button);
+
+                button.dataset.row = rowIndex;
+                button.dataset.column = colIndex;
             });   
         });
+
+        onScreenBoard.querySelectorAll('button').forEach(button =>{
+            button.addEventListener('click', handleClick);
+        });
+
+
 
         // map it an display it - CHECK
 
@@ -234,8 +246,24 @@ var display = (function(){
   
     }
 
+
+    function handleClick(event){
+        let boardArray = gameBoard;
+
+        let rowIndex = event.target.dataset.row;
+        let colIndex = event.target.dataset.column;
+
+        rowIndex = parseInt(rowIndex);
+        colIndex = parseInt(colIndex);
+
+        boardArray.changeValue(rowIndex, colIndex, "X");
+        render();
+
+    };
+
     return{
         render: render,
+        handleClick: handleClick
     };
 
 })();
