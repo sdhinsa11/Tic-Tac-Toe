@@ -239,7 +239,7 @@ var display = (function(){
 
         // map it an display it - CHECK
 
-        // then create th efunction for it to be clicked 
+        // then create th efunction for it to be clicked - YES
         // iterate through the buttons so we are able to display it
 
         // then fix the game logic with the forma dn start button and everything 
