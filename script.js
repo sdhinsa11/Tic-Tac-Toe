@@ -5,9 +5,9 @@
 var gameBoard = (function(){
 
     //creating board
-    let board = [[" X", " ", "O "],
-                 ["O ", " ", " "],
-                 [" ",  " ", "X "]];
+    let board = [[" ", " ", " "],
+                 [" ", " ", " "],
+                 [" ",  " ", " "]];
 
     function displayBoard(){
         console.log("----------------------");
@@ -40,10 +40,9 @@ var gameBoard = (function(){
             board[row][col] = player;
             return true;
         }
-        else{
-            console.log("Cannot go there"); 
-            return false;
-        }
+        
+        return false;
+        
     }
 
     function resetBoard(){
@@ -53,26 +52,15 @@ var gameBoard = (function(){
                  [ " ", " ", " "]];
     }
 
-    function checkBoardH(marker){
-        for (let row = 0 ; row < 3; row++){
-            if (board[row][0] === marker && marker === board[row][1] && board[row][2] === marker){
+    function checkWins(marker){
+        for (let pos = 0 ; pos < 3; pos++){
+            if (board[pos][0] === marker && marker === board[pos][1] && board[pos][2] === marker){
+                return true;
+            }
+            else if (board[0][pos] === marker && marker === board[1][pos] && board[2][pos] === marker){
                 return true;
             }
         }
-        return false;
-    }
-
-    function checkBoardV(marker){
-        for (let col = 0 ; col < 3; col++){
-            if (board[0][col] === marker && marker === board[1][col] && board[2][col] === marker){
-                return true;
-            }
-        }
-        return false;
-        
-    }
-
-    function checkBoardD(marker){
         if (board[0][0] === marker && marker === board[1][1] && board[2][2] === marker){
             return true;
         }
@@ -81,10 +69,10 @@ var gameBoard = (function(){
             return true;
         }
 
-        else{
-            return false;
-        }
+
+        return false;
     }
+
 
     function checkTies(){
         for (let row of board){
@@ -106,9 +94,7 @@ var gameBoard = (function(){
         resetBoard: resetBoard,
         getBoard: getBoard,
         checkTies: checkTies,
-        checkBoardD: checkBoardD,
-        checkBoardV: checkBoardV,
-        checkBoardH: checkBoardH,
+        checkWins: checkWins,
 
     };
 
@@ -123,77 +109,51 @@ function Player(name, marker){
 }
 
 var game = (function(){
+    // defing the players 
+    let playerOne;
+    let playerTwo;
+    let boardInstance = gameBoard;
+    let currentPlayer;
 
-    function inputPlayer(){
-        var pName = prompt("Enter Player name:");
-        var pMarker = prompt("Enter X or O");
-        return new Player(pName, pMarker);
-        // input players 
+
+    function startGame(pOne, pTwo){
+        playerOne = new Player(pOne, "X");
+        playerTwo = new Player(pTwo, "O");
+
+        currentPlayer = playerOne;
+        boardInstance.resetBoard();
+        // display like in switch player 
     }
 
-    function playGame(playerOne, playerTwo){
+    function switchPlayer(){
+        currentPlayer = (currentPlayer === playerOne) ? playerTwo : playerOne;
+        // call the other display the players turn 
 
-        // make board instance
-        let boardInstance = gameBoard;
-        let gameOver = false;
-        let currentPlayer = playerOne;
+    }
 
+    function getCurrentPlayer(){
+        return currentPlayer;
+    }
 
-        // this is the function
-        //press yes or no to start (use while loop)
-        while(!gameOver){
-            boardInstance.displayBoard();
+    function playGame(row, col){
 
-            console.log(`${currentPlayer.name} choose a cell:`);
-            let row = parseInt(prompt("Row Number (0-2): "));
-            let col = parseInt(prompt("Col Number (0-2): "));
-
-            boardInstance.changeValue(row, col, currentPlayer.marker);
-            boardInstance.displayBoard();
-
-
-            if (boardInstance.checkBoardV(currentPlayer.marker)){
-                console.log(`${currentPlayer.name} wins!`);
+        if (boardInstance.changeValue(row, col, currentPlayer.marker)){
+            if (boardInstance.checkWins(currentPlayer.marker)){
+                alert(`${currentPlayer.name} wins!`);
                 currentPlayer.points++;
-                gameOver = true;
             }
-            else if (boardInstance.checkBoardH(currentPlayer.marker)){
-                console.log(`${currentPlayer.name} wins!`);
-                currentPlayer.points++;
-                gameOver = true;
-            }
-
-            else if (boardInstance.checkBoardD(currentPlayer.marker)){
-                console.log(`${currentPlayer.name} win!`);
-                currentPlayer.points++;
-                gameOver = true;
-            }
-
             else if (boardInstance.checkTies()){
                 console.log("Its a tie");
-                gameOver = true;
+                alert("Game done");
             }
-
-            currentPlayer = (currentPlayer === playerOne) ? playerTwo : playerOne;
+            switchPlayer();
         }
-
-        let playAgain = prompt("Do you want to play again? (Y/N: ");
-        if (playAgain === "Y")
-            {
-                boardInstance.resetBoard();
-                playGame(playerOne, playerTwo);
-            }
-        else{
-            console.log("Game is done!");
-            console.log(`${playerOne.name} has ${playerOne.points} points.`);
-            console.log(`${playerTwo.name} has ${playerTwo.points} points.`);
-        }
-
-
+        
+            
     }
 
     return {
-        inputPlayer: inputPlayer,
+        startGame: startGame,
         playGame: playGame,
     };
 
@@ -202,9 +162,16 @@ var game = (function(){
 
 var display = (function(){
 
-    
+    // grab the values for the functions
     
     let onScreenBoard = document.querySelector(".board");
+    const startButton = document.getElementById("start");
+    const restartButton = document.getElementById("restart");
+    const playAgain = document.getElementById("playAgain")
+
+    const pOne = document.getElementById("player1");
+    const pTwo = document.getElementById("player2");
+    
 
     function render(){
         let boardArray = gameBoard.getBoard();
@@ -235,31 +202,42 @@ var display = (function(){
             button.addEventListener('click', handleClick);
         });
 
-
-
-        // map it an display it - CHECK
-
-        // then create th efunction for it to be clicked - YES
-        // iterate through the buttons so we are able to display it
-
-        // then fix the game logic with the forma dn start button and everything 
-  
     }
 
 
     function handleClick(event){
-        let boardArray = gameBoard;
-
         let rowIndex = event.target.dataset.row;
         let colIndex = event.target.dataset.column;
 
         rowIndex = parseInt(rowIndex);
         colIndex = parseInt(colIndex);
 
-        boardArray.changeValue(rowIndex, colIndex, "X");
+        game.playGame(rowIndex, colIndex);
         render();
 
     };
+
+
+    startButton.addEventListener("click", function(){
+        const pOneName = pOne.value;
+        const pTwoName = pTwo.value;
+        game.startGame(pOneName, pTwoName);
+        render();
+
+        //get container
+        
+    })
+
+    playAgain.addEventListener("click", function(){
+        const pOneName = pOne.value;
+        const pTwoName = pTwo.value;
+        gameBoard.resetBoard();
+        render();
+        game.startGame(pOneName, pTwoName);
+        dialog.close();
+    })
+
+
 
     return{
         render: render,
