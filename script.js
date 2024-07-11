@@ -9,28 +9,9 @@ var gameBoard = (function(){
                  [" ", " ", " "],
                  [" ",  " ", " "]];
 
-    function displayBoard(){
-        console.log("----------------------");
-        for (let i = 0; i < 3; i++){
-            let row = "|";
-            for(let j = 0; j < 3; j++){
-                row += board[i][j] ? `${board[i][j]} |` : "  |";
-            }
-            console.log(row);
-            console.log("----------------------");
-        }
-    }
-
     function getBoard(){
         return board;
     }
-
-    // function getCell(){
-    //     let row = parseInt(prompt("Row Number (0-2): "));
-    //     let col = parseInt(prompt("Col Number (0-2): "));
-    //     return row, col;
-    // }
-
 
     // get the value 
 
@@ -89,7 +70,6 @@ var gameBoard = (function(){
     // modify the board 
 
     return{
-        displayBoard: displayBoard,
         changeValue: changeValue,
         resetBoard: resetBoard,
         getBoard: getBoard,
@@ -238,7 +218,6 @@ var display = (function(){
     })
 
 
-
     return{
         render: render,
         handleClick: handleClick
@@ -247,12 +226,6 @@ var display = (function(){
 })();
 
 
-// playerOne = new game.inputPlayer();
-// playerTwo = new game.inputPlayer();
-
-// game.playGame(playerOne, playerTwo);
-
-display.render();
 
 
 

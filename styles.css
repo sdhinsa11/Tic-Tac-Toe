@@ -1,0 +1,40 @@
+*{
+    margin:0;
+    background-color: #C2CAD0;
+
+    
+}
+
+
+.container{
+    display:grid;
+    grid-template-rows: 150px auto;
+    
+
+}
+
+.header{
+    border:1px solid rgb(0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    background-color: #AFD275;
+
+}
+
+.home{
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    border: 1px solid orange;
+    width: 300px;
+    height: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 20px;
+    background-color: #E7717D;
+}
