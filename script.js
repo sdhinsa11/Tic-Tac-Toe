@@ -143,6 +143,7 @@ var display = (function(){
     const homeSection = document.querySelector(".home");
     const result = document.querySelector(".result");
     const dialog = document.querySelector("dialog");
+    const info = document.querySelector(".display");
 
     const pOne = document.getElementById("player1");
     const pTwo = document.getElementById("player2");
@@ -201,6 +202,8 @@ var display = (function(){
         const pOneName = pOne.value;
         const pTwoName = pTwo.value;
         game.startGame(pOneName, pTwoName);
+
+        info.style.display = 'flex'
 
         homeSection.style.display = 'none';
         render();
