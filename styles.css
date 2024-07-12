@@ -66,3 +66,11 @@
 #start:hover{
     background-color:#89CFF0 ;
 }
+
+
+.main{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

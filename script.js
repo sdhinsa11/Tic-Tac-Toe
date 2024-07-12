@@ -1,7 +1,4 @@
 
-
-// step 1: 
-
 var gameBoard = (function(){
 
     //creating board
@@ -49,8 +46,6 @@ var gameBoard = (function(){
         else if (board[0][2]=== marker && marker === board[1][1] && board[2][0] === marker){
             return true;
         }
-
-
         return false;
     }
 
@@ -64,7 +59,6 @@ var gameBoard = (function(){
             }
         }
         return true; // no empty spots
-        
     }
 
     // modify the board 
@@ -80,7 +74,6 @@ var gameBoard = (function(){
 
 })();
 
-
 // using an object constructor cause we have a specific type of object that we need to duplicate (can add functions)
 function Player(name, marker){
     this.name = name;
@@ -95,41 +88,39 @@ var game = (function(){
     let boardInstance = gameBoard;
     let currentPlayer;
 
+    let info = document.querySelector(".display");
+
+
 
     function startGame(pOne, pTwo){
         playerOne = new Player(pOne, "X");
         playerTwo = new Player(pTwo, "O");
 
         currentPlayer = playerOne;
+        info.textContent = `${currentPlayer.name}'s turn`;
+
         boardInstance.resetBoard();
-        // display like in switch player 
     }
 
     function switchPlayer(){
         currentPlayer = (currentPlayer === playerOne) ? playerTwo : playerOne;
+        info.textContent = `${currentPlayer.name}'s turn`;
         // call the other display the players turn 
 
-    }
-
-    function getCurrentPlayer(){
-        return currentPlayer;
     }
 
     function playGame(row, col){
 
         if (boardInstance.changeValue(row, col, currentPlayer.marker)){
             if (boardInstance.checkWins(currentPlayer.marker)){
-                alert(`${currentPlayer.name} wins!`);
                 currentPlayer.points++;
+                display.displayEnd(currentPlayer.name);
             }
             else if (boardInstance.checkTies()){
-                console.log("Its a tie");
-                alert("Game done");
+                display.displayTie();
             }
             switchPlayer();
-        }
-        
-            
+        }   
     }
 
     return {
@@ -147,7 +138,11 @@ var display = (function(){
     let onScreenBoard = document.querySelector(".board");
     const startButton = document.getElementById("start");
     const restartButton = document.getElementById("restart");
-    const playAgain = document.getElementById("playAgain")
+    const playAgain = document.getElementById("playAgain");
+    const mainSection = document.querySelector(".main");
+    const homeSection = document.querySelector(".home");
+    const result = document.querySelector(".result");
+    const dialog = document.querySelector("dialog");
 
     const pOne = document.getElementById("player1");
     const pTwo = document.getElementById("player2");
@@ -162,15 +157,19 @@ var display = (function(){
         // Set grid layout for onScreenBoard - NEED to fix it
         onScreenBoard.style.display = 'grid';
         onScreenBoard.style.gridTemplateColumns = 'repeat(3, 90px)';
-        // onScreenBoard.style.gap = '10px'; 
+        onScreenBoard.style.gap = '10px'; 
 
         boardArray.map((row, rowIndex) => {
             return row.map((cell, colIndex) => {
                 let button = document.createElement('button');
                 button.textContent = cell;
                 button.style.border = '1px solid black';
-                button.style.margin = '5px';
-                button.style.width = '70px';
+                button.style.borderRadius = '5px';
+                button.style.height = '80px';
+                button.style.width = '80px';
+                button.style.fontSize= '20px';
+                button.style.fontWeight = 'bold';
+
                 onScreenBoard.appendChild(button);
 
                 button.dataset.row = rowIndex;
@@ -202,7 +201,11 @@ var display = (function(){
         const pOneName = pOne.value;
         const pTwoName = pTwo.value;
         game.startGame(pOneName, pTwoName);
+
+        homeSection.style.display = 'none';
         render();
+
+       
 
         //get container
         
@@ -215,12 +218,30 @@ var display = (function(){
         render();
         game.startGame(pOneName, pTwoName);
         dialog.close();
+
     })
+
+    restartButton.addEventListener("click", function(){
+        window.location.reload();
+
+    })
+
+    function displayEnd(name){
+        result.textContent = `${name} Wins!`;
+        dialog.showModal();
+    }
+
+    function displayTie(){
+        result.textContent = 'Game is a tie!';
+        dialog.showModal();
+    }
 
 
     return{
         render: render,
-        handleClick: handleClick
+        handleClick: handleClick,
+        displayEnd: displayEnd,
+        displayTie: displayTie,
     };
 
 })();
