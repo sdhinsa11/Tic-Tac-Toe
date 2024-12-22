@@ -1,254 +1,229 @@
-
-var gameBoard = (function(){
-
-    //creating board
-    let board = [[" ", " ", " "],
-                 [" ", " ", " "],
-                 [" ",  " ", " "]];
-
-    function getBoard(){
-        return board;
-    }
-
-    // get the value 
-
-    function changeValue(row, col, player){
-        // need the index (row and col and uses the player to determine the marker)
-        if (board[row][col] === " "){
-            board[row][col] = player;
-            return true;
-        }
-        
-        return false;
-        
-    }
-
-    function resetBoard(){
-        //reset the board
-        board = [[ " ", " ", " "],
-                 [ " ", " ", " "],
-                 [ " ", " ", " "]];
-    }
-
-    function checkWins(marker){
-        for (let pos = 0 ; pos < 3; pos++){
-            if (board[pos][0] === marker && marker === board[pos][1] && board[pos][2] === marker){
-                return true;
-            }
-            else if (board[0][pos] === marker && marker === board[1][pos] && board[2][pos] === marker){
-                return true;
-            }
-        }
-        if (board[0][0] === marker && marker === board[1][1] && board[2][2] === marker){
-            return true;
-        }
-
-        else if (board[0][2]=== marker && marker === board[1][1] && board[2][0] === marker){
-            return true;
-        }
-        return false;
-    }
-
-
-    function checkTies(){
-        for (let row of board){
-            for(let cell of row){
-                if (cell === " "){
-                    return false; // still empty
-                }
-            }
-        }
-        return true; // no empty spots
-    }
-
-    // modify the board 
-
-    return{
-        changeValue: changeValue,
-        resetBoard: resetBoard,
-        getBoard: getBoard,
-        checkTies: checkTies,
-        checkWins: checkWins,
-
-    };
-
-})();
-
-// using an object constructor cause we have a specific type of object that we need to duplicate (can add functions)
-function Player(name, marker){
+function Player(name, marker, turn){
     this.name = name;
-    this.marker = marker; 
-    this.points = 0; // after every round this will get updated 
+    this.marker= marker,
+    this.turn = turn
+};
+
+function Gameboard(){
+    this.gameboard = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    this.checkWinnings = function(marker){
+        const winningCombinations = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6]
+                ];
+                
+        return winningCombinations.some(([a, b, c]) => 
+            this.gameboard[a].toString() === marker &&
+            this.gameboard[b].toString() === marker &&
+            this.gameboard[c].toString() === marker
+        );
+    }
+
+    this.checkTies = function(){
+        let allUsed = this.gameboard.every(myFunction);
+        function myFunction(value) {
+            return value == 'X' || value == 'O';
+        }
+
+        return allUsed;
+    }
+
+    this.checkPosition = function(playerInput){
+        
+        if (this.gameboard[playerInput] == "X" ||this.gameboard[playerInput] == 'O'){
+            console.log("You can't go there");
+            return false;
+        } 
+
+        console.log("Passed");
+
+        return true;
+    }
+
+    this.playerTurn = function(marker, index){
+        this.gameboard[index] = marker;
+    }
+
+    this.resetBoard = function(){
+       this.gameboard = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    }
 }
 
-var game = (function(){
-    // defing the players 
-    let playerOne;
-    let playerTwo;
-    let boardInstance = gameBoard;
-    let currentPlayer;
+function DomInteraction(gameboard){
+    this.gameboard = gameboard;
 
-    let info = document.querySelector(".display");
+    this.printBoard = function() {
 
+        const container = document.querySelector(".board");
+        container.innerHTML = ``;
+        this.gameboard.forEach((pos, index) => {
+            const position = document.createElement('div');
+            position.classList.add('pos');
+            position.dataset.index = index;
+            position.innerHTML = this.gameboard[index] == "X" || this.gameboard[index] == "O" ?`<h2>${this.gameboard[index]}</h2>` : `<h2></h2>`;
 
-
-    function startGame(pOne, pTwo){
-        playerOne = new Player(pOne, "X");
-        playerTwo = new Player(pTwo, "O");
-
-        currentPlayer = playerOne;
-        info.textContent = `${currentPlayer.name}'s turn`;
-
-        boardInstance.resetBoard();
-    }
-
-    function switchPlayer(){
-        currentPlayer = (currentPlayer === playerOne) ? playerTwo : playerOne;
-        info.textContent = `${currentPlayer.name}'s turn`;
-        // call the other display the players turn 
-
-    }
-
-    function playGame(row, col){
-
-        if (boardInstance.changeValue(row, col, currentPlayer.marker)){
-            if (boardInstance.checkWins(currentPlayer.marker)){
-                currentPlayer.points++;
-                display.displayEnd(currentPlayer.name);
-            }
-            else if (boardInstance.checkTies()){
-                display.displayTie();
-            }
-            switchPlayer();
-        }   
-    }
-
-    return {
-        startGame: startGame,
-        playGame: playGame,
+            container.appendChild(position);
+        });  
     };
 
-})();
-
-
-var display = (function(){
-
-    // grab the values for the functions
-    
-    let onScreenBoard = document.querySelector(".board");
-    const startButton = document.getElementById("start");
-    const restartButton = document.getElementById("restart");
-    const playAgain = document.getElementById("playAgain");
-    const mainSection = document.querySelector(".main");
-    const homeSection = document.querySelector(".home");
-    const result = document.querySelector(".result");
-    const dialog = document.querySelector("dialog");
-    const info = document.querySelector(".display");
-
-    const pOne = document.getElementById("player1");
-    const pTwo = document.getElementById("player2");
-    
-
-    function render(){
-        let boardArray = gameBoard.getBoard();
-        // take list and turns it into the dom based on what the stages are at its point rn 
-
-        onScreenBoard.innerHTML = '';
-
-        // Set grid layout for onScreenBoard - NEED to fix it
-        onScreenBoard.style.display = 'grid';
-        onScreenBoard.style.gridTemplateColumns = 'repeat(3, 90px)';
-        onScreenBoard.style.gap = '10px'; 
-
-        boardArray.map((row, rowIndex) => {
-            return row.map((cell, colIndex) => {
-                let button = document.createElement('button');
-                button.textContent = cell;
-                button.style.border = '1px solid black';
-                button.style.borderRadius = '5px';
-                button.style.height = '80px';
-                button.style.width = '80px';
-                button.style.fontSize= '20px';
-                button.style.fontWeight = 'bold';
-
-                onScreenBoard.appendChild(button);
-
-                button.dataset.row = rowIndex;
-                button.dataset.column = colIndex;
-            });   
+    // in place of prompt
+    this.cellInteraction = function(){
+        var lastClickedIndex; 
+        const grid = document.querySelectorAll('.board');
+        grid.forEach((cell, index) => {
+            cell.addEventListener('click', ()=>{
+                lastClickedIndex = index;
+            });
         });
 
-        onScreenBoard.querySelectorAll('button').forEach(button =>{
-            button.addEventListener('click', handleClick);
-        });
+        return lastClickedIndex;
+    }
+
+    // in place of all the player logs
+    this.displayPlayer = function(playerName){
+        const playerTitle = document.querySelector('#gameText');
+        playerTitle.innerHTML = `${playerName}'s turn`
+    }
+
+    this.displayWinner = function(playerName){
+        const playerTitle = document.querySelector('#gameText');
+        playerTitle.innerHTML = `${playerName} won the game!`
 
     }
 
+    this.displayTie = function(){
+        const playerTitle = document.querySelector('#gameText');
+        playerTitle.innerHTML = `Game was a tie.`
+    }
 
-    function handleClick(event){
-        let rowIndex = event.target.dataset.row;
-        let colIndex = event.target.dataset.column;
+    this.displayButtons = function(){
+        document.getElementById("playAgain").style.visibility = "visible";
+        document.getElementById("restart").style.visibility = "visible";
 
-        rowIndex = parseInt(rowIndex);
-        colIndex = parseInt(colIndex);
+        document.getElementById("restart").addEventListener("click", () =>{
+            window.location.reload();
+        });
 
-        game.playGame(rowIndex, colIndex);
-        render();
+        document.getElementById("playAgain").addEventListener("click", () =>{
+            gameEnd= false;
+        });
+    }
 
-    };
+    this.resetBoard = function(){
+        this.gameboard = [1,2,3,4,5,6,7,8,9];
+    }
+
+}
+
+function gameLogic(player1, player2){
+    document.getElementById("playAgain").style.visibility = "hidden";
+    document.getElementById("restart").style.visibility = "hidden";
+
+    var player1 = player1;
+    var player2 = player2;
+
+    var board = new Gameboard();
+    var dom = new DomInteraction(board.gameboard);
+
+    var gameEnd = false;
+    var turn = 1;
+
+    dom.printBoard();
+    dom.displayPlayer(turn == 1? player1.name : player2.name);
 
 
-    startButton.addEventListener("click", function(){
-        const pOneName = pOne.value;
-        const pTwoName = pTwo.value;
-        game.startGame(pOneName, pTwoName);
+    document.querySelector(".board").addEventListener("click", (event) =>{
+        if (gameEnd) return;
+        var playerInput = parseInt(event.target.dataset.index);
 
-        info.style.display = 'flex'
+        if (board.checkPosition(playerInput)){
 
-        homeSection.style.display = 'none';
-        render();
+            if (turn == 1){
+                board.playerTurn(player1.marker, playerInput)
+                dom.printBoard();
+                
+                if (board.checkWinnings(player1.marker)){
+                    gameEnd = true;
+                    dom.displayWinner(player1.name);
+                    console.log("Game over.");
+                    dom.displayButtons();
 
-       
+                }
+                else{
+                    turn = 2;
+                    dom.displayPlayer(turn == 1? player1.name : player2.name);
+                }
+                
+            }
+            else{
+                board.playerTurn(player2.marker, playerInput)
+                dom.printBoard();
+                
+                if (board.checkWinnings(player2.marker)){
+                    gameEnd = true;
+                    dom.displayWinner(player2.name);
+                    console.log("Game over.");
+                    dom.displayButtons();
+                    
+                }
+                else{
+                    turn = 1;
+                    dom.displayPlayer(turn == 1? player1.name : player2.name);
 
-        //get container
+                }
+            }
         
+            if (!board.checkWinnings("X") && !board.checkWinnings("O")){
+                if (board.checkTies()){
+                    gameEnd = true;
+                    dom.displayTie();
+                    dom.displayButtons();
+                }
+            }
+
+        }
+        else{
+            alert("Please enter again");
+            console.log("Please enter again.");
+        }
+    
+
     })
-
-    playAgain.addEventListener("click", function(){
-        const pOneName = pOne.value;
-        const pTwoName = pTwo.value;
-        gameBoard.resetBoard();
-        render();
-        game.startGame(pOneName, pTwoName);
-        dialog.close();
-
-    })
-
-    restartButton.addEventListener("click", function(){
-        window.location.reload();
-
-    })
-
-    function displayEnd(name){
-        result.textContent = `${name} Wins!`;
-        dialog.showModal();
-    }
-
-    function displayTie(){
-        result.textContent = 'Game is a tie!';
-        dialog.showModal();
-    }
+}
 
 
-    return{
-        render: render,
-        handleClick: handleClick,
-        displayEnd: displayEnd,
-        displayTie: displayTie,
-    };
+// ALL IN factory pattern IIFE 
 
+(function () {
+
+    var player1, player2;
+
+    document.getElementById("start").addEventListener("click", ()=>{
+        player1 = new Player(document.getElementById("player1").value, 'X', 1);
+        player2 = new Player(document.getElementById("player2").value, 'O', 2);
+
+        document.getElementById("playerInput").style.visibility = "hidden";
+        
+        document.getElementById("gameText").style.visibility = "visible";
+        document.querySelector(".board").style.visibility = "visible";
+
+        gameLogic(player1, player2);
+        
+    });
+
+    document.getElementById("playAgain").addEventListener("click", ()=>{
+        gameLogic(player1, player2);
+        
+    });
+    
 })();
-
 
 
 
